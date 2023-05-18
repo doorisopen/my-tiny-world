@@ -142,7 +142,7 @@ public class AccountAcceptanceTest extends AcceptanceTest {
         String accountNumber = findResponse.jsonPath().getString("accountNumber");
         ExtractableResponse<Response> depositResponse = AccountSteps.입금_요청(token, accountNumber, BigDecimal.valueOf(2_000));
 
-        ExtractableResponse<Response> response = AccountSteps.입금_요청(token, accountNumber, BigDecimal.valueOf(1_000));
+        ExtractableResponse<Response> response = AccountSteps.출금_요청(token, accountNumber, BigDecimal.valueOf(1_000));
 
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
     }
