@@ -10,4 +10,6 @@ public interface AccountQueryRepository {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from Account a where a.accountNumber = :accountNumber")
     Optional<Account> findByAccountNumberWithPessimisticLock(AccountNumber accountNumber);
+
+    Optional<Account> findByAccountNumber(AccountNumber accountNumber);
 }

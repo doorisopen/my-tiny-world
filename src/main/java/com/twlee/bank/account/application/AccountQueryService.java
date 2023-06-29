@@ -27,6 +27,11 @@ public class AccountQueryService {
         return new AccountResponse(member.getName(), member.getEmail(), account.getAccountNumber(), account.getCash());
     }
 
+    public Account getAccountByAccountNumber(String accountNumber) {
+        return accountQueryRepository.findByAccountNumber(new AccountNumber(accountNumber))
+                .orElseThrow(() -> new AccountException("존재하지 않는 계좌 정보입니다."));
+    }
+
     public Account getAccountByAccountNumberWithPessimisticLock(String accountNumber) {
         return accountQueryRepository.findByAccountNumberWithPessimisticLock(new AccountNumber(accountNumber))
                 .orElseThrow(() -> new AccountException("존재하지 않는 계좌 정보입니다."));
@@ -34,7 +39,7 @@ public class AccountQueryService {
 
     public Account getMemberAccount(String memberEmail, String accountNumber) {
         Member member = memberService.getMemberByEmail(memberEmail);
-        Account account = getAccountByAccountNumberWithPessimisticLock(accountNumber);
+        Account account = getAccountByAccountNumber(accountNumber);
         if (!account.isOwner(member.getId())) {
             throw new AccountException("잘못된 접근입니다.");
         }

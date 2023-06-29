@@ -4,6 +4,7 @@ import com.twlee.bank.account.application.dto.TransactionRequest;
 import com.twlee.bank.account.application.dto.TransferRequest;
 import com.twlee.bank.account.application.dto.TransferResponse;
 import com.twlee.bank.account.domain.*;
+import com.twlee.bank.common.annotation.DistributedLock;
 import com.twlee.bank.member.application.MemberService;
 import com.twlee.bank.member.domain.Member;
 import org.springframework.stereotype.Service;
@@ -57,16 +58,21 @@ public class AccountService {
         account.delete();
     }
 
+    @DistributedLock(key = "#transferRequest.toAccountNumber()")
     @Transactional
     public TransferResponse transfer(String memberEmail, TransferRequest transferRequest) {
         Account fromAccount = getMemberAccount(memberEmail, transferRequest.fromAccountNumber());
-        Account toAccount = getAccountByAccountNumberWithPessimisticLock(transferRequest.toAccountNumber());
+        Account toAccount = getAccountByAccountNumber(transferRequest.toAccountNumber());
         transferService.transfer(fromAccount, toAccount, transferRequest.amount());
         return new TransferResponse(fromAccount.getAccountNumber(), fromAccount.getCash());
     }
 
     private Account getMemberAccount(String memberEmail, String accountNumber) {
         return accountQueryService.getMemberAccount(memberEmail, accountNumber);
+    }
+
+    private Account getAccountByAccountNumber(String accountNumber) {
+        return accountQueryService.getAccountByAccountNumber(accountNumber);
     }
 
     private Account getAccountByAccountNumberWithPessimisticLock(String accountNumber) {
