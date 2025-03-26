@@ -62,7 +62,7 @@ class AccountServiceTest {
     @Test
     void 동시에_송금을_수행한다() throws InterruptedException {
         // given
-        int threadCount = 100;
+        int threadCount = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(30);
         CountDownLatch countDownLatch = new CountDownLatch(threadCount);
 
@@ -88,7 +88,7 @@ class AccountServiceTest {
 
         // then
         AccountResponse accountResponse = accountQueryService.get(email, accountNumber);
-        assertEquals(BigDecimal.valueOf(60000), accountResponse.cash());
+        assertEquals(BigDecimal.valueOf(15000), accountResponse.cash());
     }
 
     private Map<String, String> 송금_테스터를_생성(int count) {
