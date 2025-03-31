@@ -1,19 +1,15 @@
 package com.twlee.bank.channel.util;
 
-import com.daou.msggw.smsgw.message.sender.channel.exception.SocketReadException;
+
+import com.twlee.bank.channel.exception.SocketReadException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
 public class SocketUtil {
-
-    public static void connect(Socket socket, String host, int port, int timeout) throws Exception {
-        socket.connect(new InetSocketAddress(host, port), timeout);
-    }
 
     public static void write(Socket socket, byte[] data) throws SocketException, IOException {
         OutputStream out = socket.getOutputStream();

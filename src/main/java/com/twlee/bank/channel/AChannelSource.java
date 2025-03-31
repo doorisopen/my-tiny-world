@@ -2,11 +2,11 @@ package com.twlee.bank.channel;
 
 import com.twlee.bank.channel.pool.ChannelPool;
 
-public class FooChannelSource implements ChannelSource {
+public class AChannelSource implements ChannelSource {
     private final ChannelPool channelPool1;
     private final ChannelPool channelPool2;
 
-    public FooChannelSource(ChannelConfig channelConfig1, ChannelConfig channelConfig2) {
+    public AChannelSource(ChannelConfig channelConfig1, ChannelConfig channelConfig2) {
         this.channelPool1 = new ChannelPool(channelConfig1);
         this.channelPool2 = new ChannelPool(channelConfig2);
     }

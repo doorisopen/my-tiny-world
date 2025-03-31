@@ -1,11 +1,10 @@
 package com.twlee.bank.channel.pool;
 
-import com.twlee.bank.channel.*;
+import com.twlee.bank.channel.ChannelConfig;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.concurrent.*;
 
 import static com.twlee.bank.channel.util.ThreadUtil.sleep;
@@ -13,32 +12,21 @@ import static com.twlee.bank.channel.util.ThreadUtil.sleep;
 public class ChannelPool implements AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(ChannelPool.class);
 
-    private final List<PoolEntry> poolEntries; // CopyOnWriteArrayList TODO 동시성 점검 -> currentBag
+    private final CopyOnWriteArrayList<PoolEntry> poolEntries; // CopyOnWriteArrayList TODO 동시성 점검 -> currentBag
     private final ScheduledThreadPoolExecutor poolKeepingExecutorService;
 
     public ChannelPool(ChannelConfig channelConfig) {
-        ThreadFactory threadFactory = new DefaultThreadFactory("Channel housekeeper (pool " + channelConfig.getChannelName() + ")", true);
+        ThreadFactory threadFactory = new DefaultThreadFactory("Channel poolKeeper (pool " + channelConfig.getChannelName() + ")", true);
         this.poolKeepingExecutorService = new ScheduledThreadPoolExecutor(1, threadFactory, new ThreadPoolExecutor.DiscardPolicy());
         this.poolKeepingExecutorService.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         this.poolKeepingExecutorService.setRemoveOnCancelPolicy(true);
         this.poolKeepingExecutorService.scheduleAtFixedRate(new PoolKeeper(), 3000, 10_000, TimeUnit.MILLISECONDS);
 
         // create pool entries
-        this.poolEntries = createPoolEntries(channelConfig);
-    }
-
-    public List<PoolEntry> createPoolEntries(ChannelConfig channelConfig) {
-        return channelConfig.connectInfos()
+        this.poolEntries = channelConfig.connectInfos()
                 .stream()
-                .map(connectInfo -> createPoolEntry(channelConfig.channel(), connectInfo))
+                .map(channelConfig::createPoolEntry)
                 .collect(CopyOnWriteArrayList::new, CopyOnWriteArrayList::add, CopyOnWriteArrayList::addAll);
-    }
-
-    private PoolEntry createPoolEntry(Channel channel, ConnectInfo connectInfo) {
-        return switch (channel) {
-            case A -> new FooPoolEntry(this, connectInfo.host(), connectInfo.port(), connectInfo.tps());
-            default -> throw new IllegalArgumentException("Unsupported channel: " + channel);
-        };
     }
 
     /**
